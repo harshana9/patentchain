@@ -1,8 +1,8 @@
 import React, { Component, useState, useEffect } from 'react';
-import Web3 from 'web3';
-//import logo from '../logo.png';
-import './App.css';
+import Web3 from 'web3'; //Import Web3
+import './App.css'; //Import CSS
 import IPManager from '../abis/IPManager.json';//import the abi
+
 import Navbar from './Navbar';
 import SideNav from './SideNav';
 import Main from './Main'
@@ -15,10 +15,12 @@ import Footer from './Footer';
 import Details from '../pages/Details';
 import AssignHistory from '../pages/AssignHistory';
 import LicenseHistory from '../pages/LicenseHistory';
+//import logo from '../logo.png';
 
 class App extends Component {
 
   account = null;
+  renewFee = 1.5;
 
   async componentWillMount() {
     await this.loadWeb3()
@@ -103,32 +105,6 @@ class App extends Component {
   }
 
 
-
-  countryList() {
-    const arr_country = [];
-    const [countries, setCountries] = useState(null);
-
-    useEffect(() => {
-      fetch('https://restcountries.com/v3.1/all?fields=name')
-        .then(response => response.json())
-        .then(json => setCountries(json))
-        .catch(error => console.error(error));
-    }, []);
-
-    //console.log(data);
-
-    /*if(data){
-      data.keys(json).forEach(function(country) {
-        arr_country.push(country.name.common);
-      });
-    }*/
-
-    arr_country = ['dfff','bgggg'];
-    console.log(arr_country);
-
-    return (arr_country);
-  }
-
   applyPatent(priceLicense, priceAssign, owner, version, publicationDate, 
           publicationKind, publicationNumber, description, name, inventor, 
           applicationDate, applicationNo, registerdCountry, grantDate, grantNo,
@@ -141,7 +117,8 @@ class App extends Component {
         {id:12345, version:0, owner:this.account,  price_assign:web3.utils.toWei(priceAssign, 'Ether'), price_license:web3.utils.toWei(priceLicense, 'Ether'), 
           verifierPayment:web3.utils.toWei('1', 'Ether'), patent:{grant_no:grantNo, grant_date:grantDate, application_no:applicationNo, applicant:this.account, inventor:inventor, 
           publication_number:publicationNumber, registerd_country:registerdCountry, description:description, application_date:applicationDate,
-          publication_date:publicationDate, publication_kind:publicationKind, name:name}, max_license_count:maxLicenseCount, licenseCount:0
+          publication_date:publicationDate, publication_kind:publicationKind, name:name}, max_license_count:maxLicenseCount, licenseCount:0,
+          max_renew_count:1, renewCount:0
         })
       .send({ from: this.account })
       .once('receipt', (receipt) => {
@@ -159,11 +136,21 @@ class App extends Component {
     })
   }
 
-  licensePatent(id, license_date, price ) {
+  licensePatent(id, license_date, price) {
     let license_exp_date = 0
     this.setState({ loading: true })
     this.state.ipManager.methods
       .licensePatent(id, license_date, license_exp_date).send({ from: this.account, value: price})
+    .once('receipt', (receipt) => {
+      this.setState({ loading: false })
+    })
+  }
+
+  renewPatent(id, renew_date) {
+    const web3 = window.web3
+    this.setState({ loading: true })
+    this.state.ipManager.methods
+      .renewPatent(id, renew_date).send({ from: this.account, value: web3.utils.toWei(this.renewFee.toString(), 'Ether')})
     .once('receipt', (receipt) => {
       this.setState({ loading: false })
     })
@@ -184,11 +171,11 @@ class App extends Component {
     console.log(React.version)
 
     this.applyPatent = this.applyPatent.bind(this)
-    this.countryList = this.countryList.bind(this)
     this.loadBlockchainData = this.loadBlockchainData.bind(this)
     //this.patents = this.patents.bind(this)
     this.purchasePatent = this.purchasePatent.bind(this)
     this.licensePatent = this.licensePatent.bind(this)
+    this.renewPatent = this.renewPatent.bind(this)
   }
 
   render() {
@@ -204,7 +191,7 @@ class App extends Component {
             <Route path='/LicensePatent/:id' element={<LicensePatent loading={this.state.loading} patentCount={this.state.patentCount} patents={this.state.patents} licensePatent={this.licensePatent} licenses={this.state.licenses} />}/>
             <Route path='/AssignPatent/:id' element={<AssignPatent loading={this.state.loading} patentCount={this.state.patentCount} patents={this.state.patents} purchasePatent={this.purchasePatent} licenses={this.state.licenses} ownerships={this.state.ownerships} />}/>
             <Route path='/PatentList' element={<PatentList  loading={this.state.loading} patentCount={this.state.patentCount} patents={this.state.patents} />}/>
-            <Route path="/Details/:id" element={<Details patents={this.state.patents} patentCount={this.state.patentCount} purchasePatent={this.purchasePatent} account={this.account} />} />
+            <Route path="/Details/:id" element={<Details patents={this.state.patents} patentCount={this.state.patentCount} purchasePatent={this.purchasePatent} account={this.account} renewPatent={this.renewPatent} renewFee={this.renewFee} />} />
             <Route path='/AssignHistory' element={<AssignHistory  loading={this.state.loading} ownershipCount={this.state.ownershipCount} ownerships={this.state.ownerships} />}/>
             <Route path='/LicenseHistory' element={<LicenseHistory  loading={this.state.loading} licenseCount={this.state.licenseCount} licenses={this.state.licenses} />}/>          
           </Routes>

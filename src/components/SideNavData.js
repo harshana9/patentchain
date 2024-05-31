@@ -1,25 +1,24 @@
 import React from 'react'
-import * as FaIcons from 'react-icons/fa';
-import * as AiIcons from 'react-icons/ai';
 import * as IoIcons from 'react-icons/io';
+import { FaShoppingBag, FaRegRegistered, FaWpexplorer, FaUser, FaInfoCircle } from "react-icons/fa";
 
 export const SideNavData = [
     {
         title: 'Patent Explorer',
         path: '/PatentList',
-        icon: <AiIcons.AiFillHome/>,
+        icon: <FaWpexplorer />,
         cName: 'nav-text'
     },
     {
         title: 'Apply for Patent',
         path: '/ApplyPatent',
-        icon: <AiIcons.AiFillHome/>,
+        icon: <FaRegRegistered />,
         cName: 'nav-text'
     },
     {
         title: 'Assigns',
         path: '/AssignHistory',
-        icon: <AiIcons.AiFillHome/>,
+        icon: <FaShoppingBag/>,
         cName: 'nav-text'
     },
     {
@@ -28,10 +27,16 @@ export const SideNavData = [
         icon: <IoIcons.IoIosClock/>,
         cName: 'nav-text'
     },
-    {
+    /*{
         title: 'User',
         path: '/',
-        icon: <IoIcons.IoIosBulb/>,
+        icon: <FaUser />,
         cName: 'nav-text'
+    },*/
+    {
+        title: 'About',
+        path: 'http://patent-chain.free.nf',
+        icon: <FaInfoCircle />,
+        cName:'nav-text'
     },
 ]

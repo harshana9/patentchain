@@ -73,6 +73,13 @@ let { id } = useParams()
                                                 </label>
                                                 <h5 class="fs-6">{window.web3.utils.fromWei(patent.price_assign.toString(), 'ether')} ETH</h5>
                                             </div>
+                                            <div class="col-12 col-sm-12 col-md-4 col-lg-3">
+                                                <label class="form-label fs-6 fw-bold">
+                                                    <button class="button btn-warning"  onClick= {() => {props.renewPatent(patent.id,Date.now())}}><i class="fas fa-refresh"></i> Renew</button>
+                                                </label>
+                                                <h5 class="fs-6">Current Renewal: {patent.renewCount.toString()} </h5>
+                                                <h5 class="fs-6">Renewal Fee: {props.renewFee.toString()} </h5>
+                                            </div>
                                             <div class="col-12 col-sm-12 col-md-10 col-lg-8 "><label class="form-label fs-6 fw-bold">Description</label>
                                                 <h6 class="fs-6" style={{ textAlign: 'justify' }}>{patent.patent.description.toString()}</h6>
                                             </div>

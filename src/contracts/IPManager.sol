@@ -9,6 +9,7 @@ contract IPManager {
     uint public verifyCount = 0;
     uint public licenseCount = 0;
     uint public ownershipCount = 0;
+    uint public renewCount = 0;
 
     //Blockchain Databases
     mapping(uint => PatentContainer) public patents;//For patents
@@ -16,6 +17,7 @@ contract IPManager {
     mapping(uint => Verify) public verifies;//For Verfications
     mapping(uint => License) public licenses;//For License
     mapping(uint => Ownership) public ownerships; //For record privious ownwerships
+    mapping(uint => PatentRenewal) public renewals; //For Keep Track Of Renewals
 
     //Members of the system
     address public applicant;
@@ -49,6 +51,11 @@ contract IPManager {
         string name;
     }
 
+    struct PatentRenewal {
+        uint256 renewal_date;
+        PatentContainer patentContainer;
+    }
+
     struct PatentContainer {
         //This used becuse Struct can have only 16 local variables
         //So patent data isolate from variables need to run program
@@ -61,6 +68,8 @@ contract IPManager {
         Patent patent;
         uint max_license_count;
         uint licenseCount;
+        uint max_renew_count;
+        uint renewCount;
     }
 
     struct Verify {
@@ -93,6 +102,7 @@ contract IPManager {
     event VerifyCreated(PatentContainer patentContainer, Verify verify);
     event PatentPurchased(uint patentCount, PatentContainer patentContainer, address sender, bool status);
     event PatentLicensed(PatentContainer patentContainer, License license);
+    event PatentRenewed(PatentRenewal patentRenewal);
 
     //Appling for Patent
     function applyForPatent(PatentContainer memory new_patent_container) public payable {
@@ -119,54 +129,6 @@ contract IPManager {
         // Trigger an event
         emit ApplicationCreated(new_patent_container);
     }
-
-    //Verify Application
-    /*function verifyPatent(PatentContainer memory patent_container, Verify memory verify) public payable {
-        verify.verifier.transfer(patent_container.verifierPayment);
-
-        emit VerifyCreated(patent_container, verify);
-    }*/
-
-    
-
-    //event PatentPurchased();
-
-    /*function createPatent(PatentContainer memory new_patent_container) public {
-        // Required
-        require(bytes(new_patent_container.patent.name).length > 0);
-        require(bytes(new_patent_container.patent.description).length > 0);
-        require(bytes(new_patent_container.patent.publication_kind).length > 0);
-        require(bytes(new_patent_container.patent.registerd_country).length > 0);
-        require(bytes(new_patent_container.patent.publication_number).length > 0);
-        require(bytes(new_patent_container.patent.inventor).length > 0);
-        require(bytes(new_patent_container.patent.applicant).length > 0);
-
-        //require(bytes(_grant_no).length > 0);
-
-        //Check Simileritis
-        //Not Implemented
-
-        //if similer found check owner is same then its a version
-        //Not Implemented
-
-        //if not not allowed to register
-        // Increment patent count
-        patentCount ++;
-
-        // Create the patent
-        new_patent_container.id = patentCount;
-        patents[patentCount] = new_patent_container;
-
-        // Trigger an event
-        emit PatentCreated(new_patent_container);
-    }*/
-
-    //function 
-
-
-    /*function findSimilerPatents(PatentContainer memory new_patent_container) private {
-        
-    }*/
 
     function purchasePatent(uint id) public payable {
         // Fetch the patent
@@ -230,6 +192,30 @@ contract IPManager {
         address(licenser).transfer(msg.value);
         // Trigger an event
         emit PatentLicensed(patent, license);
+    }
+
+    function renewPatent(uint id, uint256 renewal_date) public payable {
+        // Fetch the patent
+        PatentContainer memory patent = patents[id];
+        // Fetch the owner
+        address owner = patent.owner;
+        // Make sure the patent has a valid id
+        /*require(patent.price_license > 0);
+        // Require that the renewer is the owner
+        require(owner != msg.sender);
+        //Require not excceding max renew count
+        require(patent.max_renew_count< patent.renewCount);*/
+        // Update the patent
+        patent.renewCount = patent.renewCount + 1;
+        patents[id] = patent;
+        //Create Renew Record
+        PatentRenewal memory patentRenewal = PatentRenewal(renewal_date, patent);
+        //Update renewal map count
+        renewCount = renewCount + 1;
+        //Add Renew Record to Map
+        renewals[renewCount] = patentRenewal;        
+        // Trigger an event
+        emit PatentRenewed(patentRenewal);
     }
 }
 
